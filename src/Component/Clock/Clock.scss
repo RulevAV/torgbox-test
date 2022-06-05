@@ -1,0 +1,110 @@
+$size: 200px;
+$hand_clock: calc($size/2);
+$correct: calc($size/2 - $hand_clock);
+$white: #f4eed7;
+$feature : #cdf0f7;
+$hour : red;
+
+.Clock {
+  margin: 5px;
+}
+
+.MechWatches {
+  height: $size;
+  width: $size;
+  border-radius: calc($size / 2);
+  display: flex;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #a8afbb;
+  box-sizing: border-box;
+
+  &__second,
+  &__minute,
+  &__hour,
+  &__indicator {
+    position: absolute;
+    width: 2px;
+    background: $white;
+    transform-origin: bottom center;
+    border-radius: 1px;
+  }
+
+  &__second {
+    margin-top: $correct;
+    height: $hand_clock;
+    background: $feature;
+    z-index: 3;
+  }
+
+  &__minute {
+    height: calc($hand_clock*2/3);
+    margin-top: calc($hand_clock/3 + $correct);
+    opacity: 0.75;
+    z-index: 4;
+  }
+
+  &__hour {
+    height: calc($hand_clock/3);
+    margin-top: calc($hand_clock*2/3 + $correct);
+    background: $hour;
+    z-index: 5;
+  }
+
+  &__indicator {
+    height: calc($hand_clock - 4px);
+    border-top: 4px solid $feature;
+    background: none;
+  }
+
+  &__indicator:nth-of-type(5n) {
+    opacity: 1;
+    height: calc(($size / 2) - 7px);
+    border-top: 7px solid $white;
+  }
+
+  &__dial {
+    height: $size;
+    width: $size;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+
+    li {
+      list-style-type: none;
+      position: absolute;
+      width: 20px;
+      margin-top: 10px;
+      text-align: center;
+      height: calc($size/2 - 10px);
+      transform-origin: bottom center;
+      z-index: 2;
+
+      @for $i from 2 through 12 {
+        &:nth-child(#{$i}) {
+          transform: rotateZ(calc(30deg * #{$i - 1 }));
+
+          i {
+            position: absolute;
+            transform: translateX(-50%) rotate(calc(-30deg * #{$i - 1 }))
+          }
+        }
+      }
+    }
+  }
+
+}
+
+.Center {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 20px;
+}
+
+@for $i from 1 through 60 {
+  .MechWatches__indicator:nth-of-type(#{$i}) {
+    transform: rotateZ(calc(6deg * #{$i}));
+  }
+}

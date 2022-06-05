@@ -1,58 +1,57 @@
-import React, { useEffect, useState } from "react";
-import { initial } from "./initial-values";
-import TimeType from "./types";
+import React, { useEffect, useRef, useState } from "react";
+import "./Clock.scss";
+import Select from "../Select/Select";
+import MechWatches from "./MechWatches";
+import TimezoneType from "../../http/models/api/timezones";
 
-const Clock: React.FC = ({ }) => {
-    const [data, setdata] = useState<TimeType>(initial);
+interface PropsType {
+  data: Array<TimezoneType>
+}
 
-    useEffect(() => {
-        const handle = setInterval(
-            () => {
-                const date = new Date();
-                let hh = date.getHours();
-                let mm = date.getMinutes();
-                let ss = date.getSeconds();
+const setTimezon = (date: Date, timezone: number) => {
+  const tzDifference = timezone * 60 + date.getTimezoneOffset();
+  return new Date(date.getTime() + tzDifference * 60 * 1000);
+}
 
-                setdata({
-                    hh: hh * 30,
-                    mm: mm * 6,
-                    ss: ss * 6
-                })
-            },
-            1000
-        );
+const Clock: React.FC<PropsType> = ({ data }) => {
+  const [date, setDate] = useState<Date>(new Date());
+  const [idTimezon, setIdTimezon] = useState(0);
 
-        return ()=>{
-            clearInterval(handle);
-        }
-    }, [])
+  const handle = useRef<NodeJS.Timer>();
 
-    const mark = [];
-    for (let i = 0; i < 60; i++) {
-        mark.push(<section key={i} className="clock__indicator"></section>);
+  const updateTime = () => {
+    if (data.length !== 0) {
+      return setDate(setTimezon(new Date, +data[idTimezon].timezone));
     }
 
-    return <div className="clock">
-        <div className="clock__second" style={{ transform: `rotateZ(${data.ss}deg)` }}></div>
-        <div className="clock__minute" style={{ transform: `rotateZ(${data.mm}deg)` }}></div>
-        <div className="clock__hour" style={{ transform: `rotateZ(${data.hh}deg)` }}></div>
-        {mark}
-        <ul className="clock__dial">
-            <li><i>12</i></li>
-            <li><i>1</i></li>
-            <li><i>2</i></li>
-            <li><i>3</i></li>
-            <li><i>4</i></li>
-            <li><i>5</i></li>
-            <li><i>6</i></li>
-            <li><i>7</i></li>
-            <li><i>8</i></li>
-            <li><i>9</i></li>
-            <li><i>10</i></li>
-            <li><i>11</i></li>
-        </ul>
+    setDate(new Date)
+  }
 
+  useEffect(() => {
+    updateTime();
+
+    if (handle.current)
+      clearInterval(handle.current);
+
+    handle.current = setInterval(
+      updateTime,
+      1000
+    );
+
+    return () => {
+      clearInterval(handle.current);
+    }
+  }, [data, idTimezon])
+
+  return <div className="Clock">
+    <MechWatches date={date} />
+    <div className="Center">
+      <span>{date.toLocaleTimeString()}</span>
     </div>
+    <div className="Center">
+      <Select data={data} idTimezon={idTimezon} setIdTimezon={setIdTimezon} />
+    </div>
+  </div>
 }
 
 export default Clock;
